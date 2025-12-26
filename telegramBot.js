@@ -193,14 +193,28 @@ async function handleHelp(chatId) {
 
 async function setWebhook(webhookUrl) {
   try {
+    console.log('Setting webhook...');
+    console.log('Bot token exists:', !!BOT_TOKEN);
+    console.log('Bot token length:', BOT_TOKEN ? BOT_TOKEN.length : 0);
+    console.log('Webhook URL:', webhookUrl);
+    
     const response = await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/setWebhook`, {
       url: webhookUrl,
       allowed_updates: ['message']
     });
-    console.log('Telegram webhook set:', response.data);
+    
+    console.log('Telegram webhook set successfully:', JSON.stringify(response.data, null, 2));
     return response.data;
   } catch (error) {
     console.error('Error setting webhook:', error.message);
+    
+    // Log detailed error information
+    if (error.response) {
+      console.error('Telegram API Error Response:', JSON.stringify(error.response.data, null, 2));
+      console.error('Status:', error.response.status);
+      console.error('Headers:', JSON.stringify(error.response.headers, null, 2));
+    }
+    
     throw error;
   }
 }
