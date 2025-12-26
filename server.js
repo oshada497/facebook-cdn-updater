@@ -54,10 +54,16 @@ app.post('/telegram-webhook', async (req, res) => {
 });
 
 // Setup Telegram webhook (call once to configure)
+// Accepts secret key from BOTH header (x-secret-key) AND query parameter (?key=...)
 app.get('/setup-telegram', async (req, res) => {
-  const secretKey = req.headers['x-secret-key'];
+  // Check for secret key in header OR query parameter
+  const secretKey = req.headers['x-secret-key'] || req.query.key;
+  
   if (secretKey !== process.env.SECRET_KEY) {
-    return res.status(401).json({ error: 'Unauthorized' });
+    return res.status(401).json({ 
+      error: 'Unauthorized',
+      hint: 'Provide secret key via header (x-secret-key) or query parameter (?key=...)'
+    });
   }
 
   try {
@@ -120,7 +126,7 @@ app.use((req, res) => {
       healthCheck: 'GET /',
       updateUrls: 'POST /update-urls (requires x-secret-key header)',
       telegramWebhook: 'POST /telegram-webhook (Telegram only)',
-      setupTelegram: 'GET /setup-telegram (requires x-secret-key header)',
+      setupTelegram: 'GET /setup-telegram (requires x-secret-key header or ?key= parameter)',
       status: 'GET /status',
       testVideo: 'GET /test-video/:videoId'
     }
